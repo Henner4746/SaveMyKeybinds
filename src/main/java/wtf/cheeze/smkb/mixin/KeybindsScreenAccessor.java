@@ -18,15 +18,13 @@
  */
 package wtf.cheeze.smkb.mixin;
 
-import net.minecraft.client.gui.screen.option.ControlsListWidget;
-import net.minecraft.client.gui.screen.option.KeybindsScreen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsList;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(KeybindsScreen.class)
+@Mixin(KeyBindsScreen.class)
 public interface KeybindsScreenAccessor {
-
-    @Accessor("controlsList")
-    ControlsListWidget getControlsListWidget();
-
+    @Accessor("keyBindsList")
+    KeyBindsList getKeyBindsList();
 }

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "savemykeybinds_test",
+  "version": "1.0.0",
+  "name": "SaveMyKeybinds Tests",
+  "environment": "client",
+  "entrypoints": {
+    "fabric-client-gametest": [
+      "wtf.cheeze.smkb.test.SaveMyKeybindsClientTest"
+    ]
+  },
+  "depends": {
+    "savemykeybinds": "*"
+  }
+}

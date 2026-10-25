@@ -19,74 +19,66 @@
 package wtf.cheeze.smkb.screen;
 
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.option.KeybindsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
+import net.minecraft.network.chat.Component;
 import wtf.cheeze.smkb.mixin.ControllingKeybindsScreenAccessor;
 import wtf.cheeze.smkb.mixin.KeybindsScreenAccessor;
 import wtf.cheeze.smkb.preset.PresetManager;
 
 public class LoadPresetScreen extends SMKBScreen {
-
-    private final ListWidget listWidget;
-    private final ButtonWidget deleteButton;
-    private final ButtonWidget loadButton;
+    private ListWidget listWidget;
+    private Button deleteButton;
+    private Button loadButton;
 
     public LoadPresetScreen(Screen parent) {
-        super(Text.translatable("smkb.screen.loadPresets"), parent);
-        this.listWidget = new ListWidget(
-                MinecraftClient.getInstance(),
-                MinecraftClient.getInstance().getWindow().getScaledWidth(),
-                (int) (SMKBScreen.screenHeight() * 0.75f) - 25, 25, 20);
-        int h = (int) (SMKBScreen.screenHeight() * 0.8f);
-        this.deleteButton = ButtonWidget.builder(Text.translatable("smkb.screen.delete"), button -> {
-            var t = listWidget.getSelectedOrNull();
-            if (t == null) return;
-            PresetManager.deletePreset(t.text);
-            listWidget.reload();
-
-        }).dimensions(centerX() - 160 ,h,150,20).build();
-
-        this.loadButton = ButtonWidget.builder(Text.translatable("smkb.screen.load"), button -> {
-            var t = listWidget.getSelectedOrNull();
-            if (t == null) return;
-
-            if (PresetManager.loadPreset(t.text) != 0 ) close();
-            if (FabricLoader.getInstance().isModLoaded("controlling")) {
-                if (MinecraftClient.getInstance().currentScreen instanceof com.blamejared.controlling.client.NewKeyBindsScreen) {
-                   ((ControllingKeybindsScreenAccessor) MinecraftClient.getInstance().currentScreen).getNewKeyList().get().update();
-                }
-            } else {
-                if (MinecraftClient.getInstance().currentScreen instanceof KeybindsScreen) {
-                    ((KeybindsScreenAccessor) MinecraftClient.getInstance().currentScreen).getControlsListWidget().update();
-                }
-            }
-        }).dimensions(centerX() + 10, h, 150, 20).build();
-
-
+        super(Component.translatable("smkb.screen.loadPresets"), parent);
     }
 
     @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-        deleteButton.active = listWidget.getSelectedOrNull() != null;
-        loadButton.active = listWidget.getSelectedOrNull() != null;
+    public void extractRenderState(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
+        deleteButton.active = listWidget.getSelected() != null;
+        loadButton.active = listWidget.getSelected() != null;
+        super.extractRenderState(graphics, mouseX, mouseY, delta);
     }
 
     @Override
     public void init() {
         super.init();
-        this.addDrawableChild(listWidget);
-        this.addDrawableChild(deleteButton);
-        this.addDrawableChild(loadButton);
+        this.listWidget = new ListWidget(
+                Minecraft.getInstance(),
+                Minecraft.getInstance().getWindow().getGuiScaledWidth(),
+                (int) (SMKBScreen.screenHeight() * 0.75f) - 25, 25, 20);
+        int h = (int) (SMKBScreen.screenHeight() * 0.8f);
+        this.deleteButton = Button.builder(Component.translatable("smkb.screen.delete"), button -> {
+            var t = listWidget.getSelected();
+            if (t == null) return;
+            PresetManager.deletePreset(t.text);
+            listWidget.reload();
+        }).bounds(centerX() - 160 ,h,150,20).build();
+        this.loadButton = Button.builder(Component.translatable("smkb.screen.load"), button -> {
+            var t = listWidget.getSelected();
+            if (t == null) return;
+            if (PresetManager.loadPreset(t.text) != 0 ) onClose();
+            Screen current = Minecraft.getInstance().gui.screen();
+            // Another mod can still open the vanilla screen while Controlling is installed
+            if (FabricLoader.getInstance().isModLoaded("controlling") && current instanceof com.blamejared.controlling.client.NewKeyBindsScreen) {
+                ((ControllingKeybindsScreenAccessor) current).getNewKeyList().get().resetMappingAndUpdateButtons();
+            } else if (current instanceof KeyBindsScreen) {
+                ((KeybindsScreenAccessor) current).getKeyBindsList().resetMappingAndUpdateButtons();
+            }
+        }).bounds(centerX() + 10, h, 150, 20).build();
+        this.addRenderableWidget(listWidget);
+        this.addRenderableWidget(deleteButton);
+        this.addRenderableWidget(loadButton);
     }
 
-    public static ButtonWidget getButton() {
-        return ButtonWidget.builder(Text.translatable("smkb.screen.loadPresets"), button -> {
-            MinecraftClient.getInstance().setScreen(new LoadPresetScreen(MinecraftClient.getInstance().currentScreen));
+    public static Button getButton() {
+        return Button.builder(Component.translatable("smkb.screen.loadPresets"), button -> {
+            Minecraft.getInstance().gui.setScreen(new LoadPresetScreen(Minecraft.getInstance().gui.screen()));
         }).width(74).build();
     }
 }

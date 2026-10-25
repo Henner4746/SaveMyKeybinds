@@ -20,10 +20,11 @@ package wtf.cheeze.smkb.preset;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import com.mojang.blaze3d.platform.InputConstants;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
 import wtf.cheeze.smkb.SaveMyKeybinds;
 
 import java.io.FileWriter;
@@ -31,21 +32,19 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class PresetManager {
-
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
     public static int savePreset(String name) {
-
         try {
             Preset preset = new Preset();
             Path presetFile = SaveMyKeybinds.FOLDER_PATH.resolve(name + ".preset.json");
             FileWriter writer = new FileWriter(presetFile.toFile());
             writer.write(GSON.toJson(preset));
             writer.close();
-            SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.save.success.title").formatted(Formatting.GREEN), Text.translatable("smkb.toast.save.success.body", name));
+            SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.save.success.title").withStyle(ChatFormatting.GREEN), Component.translatable("smkb.toast.save.success.body", name));
         } catch (Exception e) {
             SaveMyKeybinds.LOGGER.error("Failed to write preset file", e);
-            SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.save.failure.title").formatted(Formatting.RED), Text.translatable("smkb.toast.save.failure.body", name));
+            SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.save.failure.title").withStyle(ChatFormatting.RED), Component.translatable("smkb.toast.save.failure.body", name));
             return 0;
         }
         return 1;
@@ -56,18 +55,22 @@ public class PresetManager {
             Path presetFile = SaveMyKeybinds.FOLDER_PATH.resolve(name + ".preset.json");
             String content = Files.readString(presetFile);
             Preset preset = GSON.fromJson(content, Preset.class);
-            for (var keybinding: MinecraftClient.getInstance().options.allKeys) {
+            Minecraft minecraft = Minecraft.getInstance();
+            for (KeyMapping keybinding: minecraft.options.keyMappings) {
                 var presetBinding = preset.keybinds.get(SaveMyKeybinds.getTranslationKey(keybinding));
                 if (presetBinding != null) {
-                    keybinding.setBoundKey(InputUtil.fromTranslationKey(presetBinding.key));
+                    keybinding.setKey(InputConstants.getKey(presetBinding.key));
                 } else if (preset.strict) {
-                    keybinding.setBoundKey(InputUtil.UNKNOWN_KEY);
+                    keybinding.setKey(InputConstants.UNKNOWN);
                 }
             }
-        SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.load.success.title").formatted(Formatting.GREEN), Text.translatable("smkb.toast.load.success.body", name));
+            // Apply the new keys right away and keep them after a restart
+            KeyMapping.resetMapping();
+            minecraft.options.save();
+        SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.load.success.title").withStyle(ChatFormatting.GREEN), Component.translatable("smkb.toast.load.success.body", name));
         } catch (Exception e) {
             SaveMyKeybinds.LOGGER.error("Failed to read preset file", e);
-            SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.load.failure.title").formatted(Formatting.RED), Text.translatable("smkb.toast.load.failure.body", name));
+            SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.load.failure.title").withStyle(ChatFormatting.RED), Component.translatable("smkb.toast.load.failure.body", name));
             return 0;
         }
         return 1;
@@ -77,10 +80,10 @@ public class PresetManager {
         try {
             Path presetFile = SaveMyKeybinds.FOLDER_PATH.resolve(name + ".preset.json");
             Files.delete(presetFile);
-            SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.delete.success.title").formatted(Formatting.GREEN), Text.translatable("smkb.toast.delete.success.body", name));
+            SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.delete.success.title").withStyle(ChatFormatting.GREEN), Component.translatable("smkb.toast.delete.success.body", name));
         } catch (Exception e) {
             SaveMyKeybinds.LOGGER.error("Failed to delete preset file", e);
-            SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.delete.failure.title").formatted(Formatting.RED), Text.translatable("smkb.toast.delete.failure.body", name));
+            SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.delete.failure.title").withStyle(ChatFormatting.RED), Component.translatable("smkb.toast.delete.failure.body", name));
             return 0;
         }
         return 1;

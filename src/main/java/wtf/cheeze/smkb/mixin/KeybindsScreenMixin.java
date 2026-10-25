@@ -19,33 +19,27 @@
 package wtf.cheeze.smkb.mixin;
 
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.client.gui.screen.option.KeybindsScreen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.DirectionalLayoutWidget;
+import net.minecraft.client.gui.layouts.LinearLayout;
+import net.minecraft.client.gui.screens.options.controls.KeyBindsScreen;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import wtf.cheeze.smkb.SaveMyKeybinds;
 import wtf.cheeze.smkb.screen.LoadPresetScreen;
 import wtf.cheeze.smkb.screen.SavePresetScreen;
 
-@Mixin(KeybindsScreen.class)
+@Mixin(KeyBindsScreen.class)
 public abstract class KeybindsScreenMixin {
 
-	@Shadow private ButtonWidget resetAllButton;
-
-	@Inject(method = "initFooter", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/widget/DirectionalLayoutWidget;add(Lnet/minecraft/client/gui/widget/Widget;)Lnet/minecraft/client/gui/widget/Widget;", ordinal = 1))
-	private void addCustomButton(CallbackInfo ci, @Local DirectionalLayoutWidget widget) {
-		widget.add(SavePresetScreen.getButton());
-		widget.add(LoadPresetScreen.getButton());
+	// Between "Reset Keys" and "Done"
+	@Inject(method = "addFooter", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/layouts/LinearLayout;addChild(Lnet/minecraft/client/gui/layouts/LayoutElement;)Lnet/minecraft/client/gui/layouts/LayoutElement;", ordinal = 1))
+	private void addCustomButton(CallbackInfo ci, @Local LinearLayout widget) {
+		widget.addChild(SavePresetScreen.getButton());
+		widget.addChild(LoadPresetScreen.getButton());
 	}
-	@Inject(method = "initFooter", at = @At("TAIL"))
-	private void addCustomButton2(CallbackInfo ci, @Local DirectionalLayoutWidget widget) {
-		widget.forEachElement((button) -> {
-			var b = (ButtonWidget) button;
-			b.setWidth(100);
-		});
+
+	@Inject(method = "addFooter", at = @At("TAIL"))
+	private void addCustomButton2(CallbackInfo ci, @Local LinearLayout widget) {
+		widget.visitWidgets(button -> button.setWidth(100));
 	}
 }

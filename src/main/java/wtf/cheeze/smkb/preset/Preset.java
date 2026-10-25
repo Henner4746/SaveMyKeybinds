@@ -18,7 +18,8 @@
  */
 package wtf.cheeze.smkb.preset;
 
-import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
 import wtf.cheeze.smkb.SaveMyKeybinds;
 
 import java.util.HashMap;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class Preset {
+
     /**
      * A version number for the preset file. V1 is the original version, V2 is the
      * new version that supports modifiers. They are fully backwards compatible and partially
@@ -45,10 +47,10 @@ public class Preset {
      */
     public Map<String, Keybind> keybinds = new HashMap<>();
 
-
     public Preset() {
-        for (var keybinding: MinecraftClient.getInstance().options.allKeys) {
-            keybinds.put(SaveMyKeybinds.getTranslationKey(keybinding), new Keybind(keybinding.getBoundKeyTranslationKey()));
+        for (KeyMapping keybinding: Minecraft.getInstance().options.keyMappings) {
+            // Key names like key.keyboard.g survive the switch to SDL key codes in 26.3, raw codes would not
+            keybinds.put(SaveMyKeybinds.getTranslationKey(keybinding), new Keybind(keybinding.saveString()));
         }
     }
 
@@ -62,6 +64,7 @@ public class Preset {
         public Keybind(String key) {
             this.key = key;
         }
+
         public Keybind(String key, Set<Modifier> modifiers) {
             this.key = key;
             this.modifiers = modifiers;

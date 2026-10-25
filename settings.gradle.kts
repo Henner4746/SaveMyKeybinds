@@ -1,17 +1,14 @@
 pluginManagement {
 	repositories {
-		maven {
-			name = "Fabric"
-			url = uri("https://maven.fabricmc.net/")
-		}
-		mavenCentral()
+		maven("https://maven.fabricmc.net/")
+		maven("https://maven.kikugie.dev/releases")
 		gradlePluginPortal()
-		maven("https://maven.kikugie.dev/snapshots")
+		mavenCentral()
 	}
 }
 
 plugins {
-	id("dev.kikugie.stonecutter") version "0.8.2"
+	id("dev.kikugie.stonecutter") version "0.7.10"
 }
 
 stonecutter {
@@ -19,7 +16,10 @@ stonecutter {
 	centralScript = "build.gradle.kts"
 
 	create(rootProject) {
-		versions("1.21.1", "1.21.3", "1.21.4", "1.21.5", "1.21.8", "1.21.10", "1.21.11")
-		vcsVersion = "1.21.11"
+		version("26.2", "26.2")
+		version("26.3", "26.3")
+		vcsVersion = "26.3"
 	}
 }
+
+rootProject.name = "savemykeybinds-continued"

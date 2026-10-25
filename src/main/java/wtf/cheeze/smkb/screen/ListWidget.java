@@ -18,20 +18,17 @@
  */
 package wtf.cheeze.smkb.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.widget.AlwaysSelectedEntryListWidget;
-import net.minecraft.text.Text;
-import wtf.cheeze.smkb.SaveMyKeybinds;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.network.chat.Component;
 import wtf.cheeze.smkb.preset.PresetManager;
 
-public class ListWidget extends AlwaysSelectedEntryListWidget<ListWidget.Entry> {
+public class ListWidget extends ObjectSelectionList<ListWidget.Entry> {
 
-    public ListWidget(MinecraftClient minecraftClient, int width, int height, int top, int entryHeight) {
-        super(minecraftClient, width, height, top, entryHeight);
-        for (var preset : PresetManager.getPresets()) {
-            this.addEntry(new Entry(preset.split("\\.")[0]));
-        }
+    public ListWidget(Minecraft minecraft, int width, int height, int top, int entryHeight) {
+        super(minecraft, width, height, top, entryHeight);
+        this.reload();
     }
 
     public void reload() {
@@ -41,8 +38,7 @@ public class ListWidget extends AlwaysSelectedEntryListWidget<ListWidget.Entry> 
         }
     }
 
-    public static class Entry extends AlwaysSelectedEntryListWidget.Entry<Entry> {
-
+    public static class Entry extends ObjectSelectionList.Entry<Entry> {
         public final String text;
 
         public Entry(String text) {
@@ -50,39 +46,20 @@ public class ListWidget extends AlwaysSelectedEntryListWidget<ListWidget.Entry> 
             this.text = text;
         }
 
-
-
-        //?if <1.21.10 {
-        /*@Override
-        public void render(DrawContext context, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean hovered, float tickDelta) {
-            context.drawCenteredTextWithShadow(
-                    MinecraftClient.getInstance().textRenderer,
-                    text,
-                    SMKBScreen.centerX(),
-                    y + 3,
-                    !hovered && !isFocused() ? 0xFFC0C0C0: 0xFFFFFFFF
-            );
-        }
-        *///? } else {
         @Override
-        public void render(DrawContext context, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
-            context.drawCenteredTextWithShadow(
-                    MinecraftClient.getInstance().textRenderer,
+        public void extractContent(GuiGraphicsExtractor graphics, int mouseX, int mouseY, boolean hovered, float deltaTicks) {
+            graphics.centeredText(
+                    Minecraft.getInstance().font,
                     text,
                     SMKBScreen.centerX(),
                     getY() + 3,
                     !hovered && !isFocused() ? 0xFFC0C0C0: 0xFFFFFFFF
             );
         }
-        //?}
-
-
 
         @Override
-        public Text getNarration() {
-            return Text.literal(text);
+        public Component getNarration() {
+            return Component.literal(text);
         }
-
-
     }
 }

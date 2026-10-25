@@ -18,55 +18,39 @@
  */
 package wtf.cheeze.smkb.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.screen.ScreenTexts;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
 
 public abstract class SMKBScreen extends Screen {
-
     private final Screen parent;
-    private final ButtonWidget doneButton;
 
-    public SMKBScreen(Text title, Screen parent) {
+    public SMKBScreen(Component title, Screen parent) {
         super(title);
         this.parent = parent;
-        this.doneButton = ButtonWidget.builder(ScreenTexts.DONE, (b) -> {
-            this.close();
-        }).dimensions(centerX() - 100, (int) (screenHeight() * 0.9), 200, 20).build();
-        this.addDrawableChild(new CenteredTextWidget(title, 10));
     }
 
     @Override
-    public void close() {
-        MinecraftClient.getInstance().setScreen(parent);
+    public void onClose() {
+        Minecraft.getInstance().gui.setScreen(parent);
     }
 
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-
-        super.render(context, mouseX, mouseY, delta);
-      //  context.drawCenteredTextWithShadow(textRenderer, title, centerX(), 10, 0xffffff);
-
-    }
-
+    // Widgets are added here because init() clears everything added before
     @Override
     public void init() {
-        this.addDrawableChild(doneButton);
+        this.addRenderableWidget(new CenteredTextWidget(title, 10));
+        this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (b) -> {
+            this.onClose();
+        }).bounds(centerX() - 100, (int) (screenHeight() * 0.9), 200, 20).build());
     }
 
     public static int centerX() {
-        return MinecraftClient.getInstance().getWindow().getScaledWidth() / 2;
+        return Minecraft.getInstance().getWindow().getGuiScaledWidth() / 2;
     }
+
     public static int screenHeight() {
-        return MinecraftClient.getInstance().getWindow().getScaledHeight();
+        return Minecraft.getInstance().getWindow().getGuiScaledHeight();
     }
-
-
-
-
-
 }

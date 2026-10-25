@@ -18,7 +18,6 @@
  */
 package wtf.cheeze.smkb.mixin;
 
-
 import com.blamejared.controlling.client.NewKeyBindsList;
 import com.blamejared.controlling.client.NewKeyBindsScreen;
 import com.moulberry.mixinconstraints.annotations.IfModLoaded;

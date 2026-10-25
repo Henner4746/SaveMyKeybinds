@@ -20,10 +20,10 @@ package wtf.cheeze.smkb;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.text.Text;
+import net.minecraft.client.KeyMapping;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.network.chat.Component;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,9 +32,7 @@ import java.nio.file.Path;
 public class SaveMyKeybinds implements ModInitializer {
 	public static final String MOD_ID = "SaveMyKeybinds";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-
 	public static final Path FOLDER_PATH = FabricLoader.getInstance().getConfigDir().resolve("savemykeybinds");
-
 
 	@Override
 	public void onInitialize() {
@@ -47,15 +45,11 @@ public class SaveMyKeybinds implements ModInitializer {
 		}
 	}
 
-	public static void sendToast(Text title, Text message) {
-		MinecraftClient.getInstance().getToastManager().add(new SystemToast(SystemToast.Type.PERIODIC_NOTIFICATION, title, message));
+	public static void sendToast(Component title, Component message) {
+		SystemToast.add(Minecraft.getInstance().gui.toastManager(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, message);
 	}
 
-	public static String getTranslationKey(KeyBinding bind) {
-		//? if <1.21.10 {
-		/*return bind.getTranslationKey();
-		 *///?} else {
-		return bind.getId();
-		//?}
+	public static String getTranslationKey(KeyMapping bind) {
+		return bind.getName();
 	}
 }

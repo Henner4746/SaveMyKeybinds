@@ -18,15 +18,12 @@
  */
 package wtf.cheeze.smkb.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.resource.language.I18n;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
 import org.intellij.lang.annotations.Language;
 import wtf.cheeze.smkb.SaveMyKeybinds;
 import wtf.cheeze.smkb.preset.PresetManager;
@@ -35,53 +32,40 @@ import java.util.regex.Pattern;
 
 public class SavePresetScreen extends SMKBScreen {
 
-    private TextFieldWidget nameWidget;
-    private ButtonWidget saveWidget;
-
     @Language("RegExp")
     public final static String[] FORBIDDEN_CHARS = {"\\\\", "/", ":", "<", ">", "\"", "\\|", "\\?", "\\*"};
-
     public static final Pattern FORBIDDEN_CHARS_PATTERN = Pattern.compile(String.join("|", FORBIDDEN_CHARS));
 
-
     public SavePresetScreen(Screen parent) {
-        super(Text.translatable("smkb.screen.savePresets"), parent);
-        this.nameWidget = new TextFieldWidget(MinecraftClient.getInstance().textRenderer, centerX() - 150, 40, 300, 20, Text.literal("Preset"));
-        this.saveWidget = ButtonWidget.builder(Text.literal("Save"), (button) -> {
-            var t = nameWidget.getText();
-            if (t.isBlank()) {
-                SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.invalid.empty.title").formatted(Formatting.RED), Text.translatable("smkb.toast.invalid.empty.body"));
-                return;
-            }
-            if (FORBIDDEN_CHARS_PATTERN.matcher(t).find()) {
-                SaveMyKeybinds.sendToast(Text.translatable("smkb.toast.invalid.special.title").formatted(Formatting.RED), Text.translatable("smkb.toast.invalid.special.body"));
-                return;
-            }
-                    if (PresetManager.savePreset(t) != 0) {
-                        close();
-                    }
-        }).dimensions(centerX() - 100, 70, 200, 20)
-                .build();
-        this.addDrawableChild(new CenteredTextWidget(Text.translatable("smkb.screen.enterName"), 27));
+        super(Component.translatable("smkb.screen.savePresets"), parent);
     }
-
 
     @Override
     public void init() {
         super.init();
-        this.addDrawableChild(nameWidget);
-        this.addDrawableChild(saveWidget);
+        EditBox nameWidget = new EditBox(Minecraft.getInstance().font, centerX() - 150, 40, 300, 20, Component.literal("Preset"));
+        Button saveWidget = Button.builder(Component.literal("Save"), (button) -> {
+            var t = nameWidget.getValue();
+            if (t.isBlank()) {
+                SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.invalid.empty.title").withStyle(ChatFormatting.RED), Component.translatable("smkb.toast.invalid.empty.body"));
+                return;
+            }
+            if (FORBIDDEN_CHARS_PATTERN.matcher(t).find()) {
+                SaveMyKeybinds.sendToast(Component.translatable("smkb.toast.invalid.special.title").withStyle(ChatFormatting.RED), Component.translatable("smkb.toast.invalid.special.body"));
+                return;
+            }
+            if (PresetManager.savePreset(t) != 0) {
+                onClose();
+            }
+        }).bounds(centerX() - 100, 70, 200, 20).build();
+        this.addRenderableWidget(new CenteredTextWidget(Component.translatable("smkb.screen.enterName"), 27));
+        this.addRenderableWidget(nameWidget);
+        this.addRenderableWidget(saveWidget);
     }
 
-    @Override
-    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
-       // context.drawCenteredTextWithShadow(textRenderer, Text.translatable("smkb.screen.enterName"), centerX(), 27, 0xbbbbbb);
-    }
-
-    public static ButtonWidget getButton() {
-        return ButtonWidget.builder(Text.translatable("smkb.screen.savePresets"), button -> {
-            MinecraftClient.getInstance().setScreen(new SavePresetScreen(MinecraftClient.getInstance().currentScreen));
+    public static Button getButton() {
+        return Button.builder(Component.translatable("smkb.screen.savePresets"), button -> {
+            Minecraft.getInstance().gui.setScreen(new SavePresetScreen(Minecraft.getInstance().gui.screen()));
         }).width(74).build();
     }
 }

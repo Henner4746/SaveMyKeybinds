@@ -1,16 +1,15 @@
 package wtf.cheeze.smkb.screen;
 
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.text.Text;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.components.StringWidget;
+import net.minecraft.network.chat.Component;
 
-public class CenteredTextWidget extends TextWidget {
-
-    public CenteredTextWidget(Text message, int x, int y) {
-        super(x - MinecraftClient.getInstance().textRenderer.getWidth(message) / 2, y, MinecraftClient.getInstance().textRenderer.getWidth(message), 9, message, MinecraftClient.getInstance().textRenderer);
+public class CenteredTextWidget extends StringWidget {
+    public CenteredTextWidget(Component message, int x, int y) {
+        super(x - Minecraft.getInstance().font.width(message) / 2, y, Minecraft.getInstance().font.width(message), 9, message, Minecraft.getInstance().font);
     }
 
-    public CenteredTextWidget(Text message, int y) {
-        super(SMKBScreen.centerX() - MinecraftClient.getInstance().textRenderer.getWidth(message) / 2, y, MinecraftClient.getInstance().textRenderer.getWidth(message), 9, message, MinecraftClient.getInstance().textRenderer);
+    public CenteredTextWidget(Component message, int y) {
+        this(message, SMKBScreen.centerX(), y);
     }
 }

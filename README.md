@@ -2,6 +2,8 @@
 
 An unofficial continuation of [SaveMyKeybinds](https://github.com/MisterCheezeCake/SaveMyKeybinds) by MisterCheezeCake, ported to Minecraft 26.2 and 26.3 (Fabric).
 
+**Download:** [Modrinth](https://modrinth.com/mod/savemykeybinds-continued) or [GitHub Releases](https://github.com/Henner4746/SaveMyKeybinds/releases)
+
 Save your key bindings as named presets and switch between them with two clicks. This is handy for different modpacks, game modes or players sharing one PC.
 
 ## Requirements
